@@ -1,14 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Welcome to the Manager App!</h2>
-
+    <h2>MemCache Configurations</h2>
     <div class="config">
-        <a href="/reset">
-            <button type="button">Reset System Data</button>
-        </a>
-        <a href="/clear">
-            <button type="button">Clear MemCaches</button>
-        </a>
+    <form action="/memcache_config" method="post">
+        <label for="capacity">MamCache Capacity (MB)</label>
+        <input type="text" id="capacity" placeholder="10" name="capacity">
+        </br>
+        </br>
+        <label for="rep_policy">Choose a Replacement Policy:</label>
+        <select name="rep_policy" id="rep_policy">
+            <option value="LRU">Least Recent Used</option>
+            <option value="RANDOM">Random</option>
+        </select>
+        </br>
+        </br>
+        <div>
+            <button id ="button" type="submit">Submit</button>
+        </div>
+    </form>
     </div>
-    <br/>
+    </br>
 {% endblock %}

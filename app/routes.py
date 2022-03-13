@@ -11,13 +11,18 @@ def stats_display():
     """
     return render_template('stats_display.html', stats=stats)
 
-@managerapp.route('/memcache_config')
+@managerapp.route('/memcache_config', methods=['GET', 'POST'])
 def memcache_config():
     """
     The configuration page of the MemCache rendered here
     - Included the clear button that clears all the MemCache
     :return:
     """
+    if request.method == 'POST':
+        capacity = request.form.get('capacity')
+        rep_policy = request.form.get('rep_policy')
+        # update the latest memcache configuration in database here
+        print("New MemCache Setting are: ", capacity, "MB, with ", rep_policy)
     return render_template('memcache_config.html')
 
 @managerapp.route('/autoscalar_config')

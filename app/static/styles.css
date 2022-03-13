@@ -18,41 +18,13 @@ h3 {
     align-items: center;
 }
 
-.config{
+.menu{
     float: right;
     margin-right: 20%;
 }
-
-.forms{
-    margin-top: 9%;
-    display:flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 25px;
-}
-
-.forms form{
+.config{
+    display: block;
     text-align: center;
-}
-
-.forms button{
-    margin-top: 10px;
-    width: 100px;
-    height: 50px;
-    font-size: 20px;
-    border-radius: 0px;
-    background-color:aliceblue;
-}
-
-.forms button:hover{
-    background-color:white;
-}
-
-input{
-    width: 90%;
-    padding: 20px 20px;
-    border-radius: 16px;
-    font-size: large;
 }
 
 .buttons button{
@@ -65,7 +37,7 @@ input{
     border-radius: 0px;
     background-color:wheat;
 }
-.config button{
+.menu button{
     width: 240px;
     height: 60px;
     font-size: 20px;
@@ -78,9 +50,30 @@ input{
     background-color:white;
 }
 
+.menu button:hover{
+    background-color:white;
+}
+
+.config input[type=text]{
+    width: 120px;
+    height: 15px;
+    background-color:white;
+}
+
+.config button{
+    width: 100px;
+    height: 40px;
+    font-size: 20px;
+    float: center;
+    margin-left: 400px;
+    border-radius: 5px;
+    background-color:wheat;
+}
+
 .config button:hover{
     background-color:white;
 }
+
 
 ul {
     list-style-type: none;
