@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
     <h2>MemCache Configurations</h2>
+    <div class="menu">
+    <a href="/clear">
+        <button type="button">Clear MemCache Contents</button>
+    </a>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
     <div class="config">
     <form action="/memcache_config" method="post">
         <label for="capacity">MamCache Capacity (MB)</label>

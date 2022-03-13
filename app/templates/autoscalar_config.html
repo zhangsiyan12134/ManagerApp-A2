@@ -1,14 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Welcome to the Manager App!</h2>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <h2>AutoScalar Configurations</h2>
     <div class="menu">
-        <a href="/reset">
-            <button type="button">Reset System Data</button>
-        </a>
-        <a href="/clear">
-            <button type="button">Clear MemCaches</button>
-        </a>
+    <a href="/clear">
+        <button type="button">Clear All Data</button>
+    </a>
     </div>
     <br/>
+    <br/>
+    <br/>
+    <br/>
+    <div class="config">
+    <p>Please select an operation mode:</p>
+    <form action="/autoscalar_config" method="post">
+        <input type="radio" id="manual" name="op_mode" value="Manual">
+        <label for="manual">Manual</label>
+        <input type="radio" id="auto" name="op_mode" value="Automatic">
+        <label for="auto">Automatic</label>
+        </br>
+        <div id="manual_fields" style="display:none">
+            <label for="pool_size">Pool Size: </label></br>
+            <input type="number" id="pool_size" name="pool_size" value="1" min="1" max="8"/>
+        </div>
+        <div id="auto_fields" style="display:none">
+            <label for="miss_max">Maximum Miss Rate: </label></br>
+            <input type="text" id="miss_max" placeholder="0.8" name="miss_max"></br>
+            <label for="miss_min">Maximum Miss Rate: </label></br>
+            <input type="text" id="miss_min" placeholder="0.2" name="miss_min"></br>
+            <label for="exp_ratio">Maximum Miss Rate: </label></br>
+            <input type="text" id="exp_ratio" placeholder="2" name="exp_ratio"></br>
+            <label for="shr_ratio">Maximum Miss Rate: </label></br>
+            <input type="text" id="shr_ratio" placeholder="0.5" name="shr_ratio"></br>
+        </div>
+        </br>
+        </br>
+        <div>
+            <button id ="button" type="submit">Submit</button>
+        </div>
+    </form>
+    </div>
+    </br>
+    <script type="text/javascript">
+        $("input[name='op_mode']:radio").change(
+            function() {
+                $("#manual_fields").toggle($(this).val() == "Manual");
+                $("#auto_fields").toggle($(this).val() == "Automatic");
+            }
+        );
+    </script>
 {% endblock %}

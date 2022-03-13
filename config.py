@@ -3,6 +3,7 @@ import os
 
 class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+    AUTOSCALAR_URL = "http://localhost:5004"
     DB_CONFIG = {
         'user': 'siyan',
         'password': 'zhangsiyan123456',
