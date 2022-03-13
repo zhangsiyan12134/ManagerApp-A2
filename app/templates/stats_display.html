@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Welcome to the Manager App!</h2>
+  <div class="config">
+    <a href="/memcache_config">
+      <button type="button">MemCache Config</button>
+    </a>
+    <a href="/autoscalar_config">
+      <button type="button">AutoScalar Config</button>
+    </a>
+  </div>
+  <br/>
+  <br/>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<br />
+<br />
+<div id="InstanceChart" style="width:100%; max-width:700px; margin-left:auto; margin-right: auto;"></div>
+<div id="MissRateChart" style="width:100%; max-width:700px; margin-left:auto; margin-right: auto;"></div>
+<div id="HitRateChart" style="width:100%; max-width:700px; margin-left:auto; margin-right: auto;"></div>
+<div id="TotalItemChart" style="width:100%; max-width:700px; margin-left:auto; margin-right: auto;"></div>
+<div id="TotalSizeChart" style="width:100%; max-width:700px; margin-left:auto; margin-right: auto;"></div>
+<div id="TotalReqChart" style="width:100%; max-width:700px; margin-left:auto; margin-right: auto;"></div>
+<script>
+    var instanceData = {{stats['Workers']}};
+    var missrateData = {{stats['MissRate']}};
+    var hitrateData = {{stats['HitRate']}};
+    var totalitemData = {{stats['Items']}};
+    var totalsizeData = {{stats['Size']}};;
+    var totalreqData = {{stats['Reqs']}};;
+    let interval_id;
+
+    function displayHistory(history, chartid, title, x_title, y_title) {
+        var x_length = history.length - 1;
+        var yArray = [];
+        var xArray = [];
+
+        for (var i = 0; i < x_length; i++) {
+            xArray.push(i);
+        }
+        for (var i = x_length - 1; i > 0; i--) {
+            yArray.push(history[i]);
+            console.log(history[i]);
+        }
+
+        var layout1 = {
+            xaxis: { autorange: "reversed", title: x_title },
+            yaxis: { title: y_title },
+            title: title
+        };
+        var data = [{ x: xArray, y: yArray, mode: "lines" }];
+        Plotly.newPlot(chartid, data, layout1);
+    }
+
+    displayHistory(instanceData, "InstanceChart", "Number of Workers in Last 30 Mins", "Time (Min)", "Number of Workers");
+    displayHistory(missrateData, "MissRateChart", "Miss Rate in Last 30 Mins", "Time (Min)", "Miss Rate (%)");
+    displayHistory(hitrateData, "HitRateChart", "Hit Rate in Last 30 Mins", "Time (Min)", "Miss Rate (%)");
+    displayHistory(totalitemData, "TotalItemChart", "Items in MemCache in Last 30 Mins", "Time (Min)", "Number of Items");
+    displayHistory(totalsizeData, "TotalSizeChart", "Content Size in MemCache in Last 30 Mins", "Time (Min)", "Size of Contents");
+    displayHistory(TotalReqChart, "TotalReqChart", "Requests in Last 30 Mins", "Time (Min)", "Number of Requests");
+    if(!interval_id){
+        interval_id = setInterval(function () {
+            location.reload("/showTable");
+        }, 10000);
+    }
+</script>
+
+{% endblock %}
