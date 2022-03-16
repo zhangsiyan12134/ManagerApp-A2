@@ -1,14 +1,35 @@
 from app import managerapp, scheduler, DEBUG, stats, scalar_config
 from flask import render_template, request, flash, jsonify, redirect, url_for, json
 from app.stat_data import stats_aws_get_workers, stats_aws_get_stat
+from random import seed, uniform, randint
 import requests
 
 
+def dummy_data():
+    new_req = randint(0, 2)
+    new_put = randint(0, 2)
+
+    total_item = randint(0, 50)
+    total_size = uniform(5.0, 25.0)
+    total_req = total_item + randint(0, 2)
+    hit_rate = new_req / total_req
+    miss_rate = new_put / total_req
+    print(total_item, total_size, total_req, hit_rate, miss_rate)
+    stats['Workers'].append(randint(1, 8))       # Statistic of number of workers
+    stats['MissRate'].append(miss_rate)      # Statistic of aggregated Miss Rate
+    stats['HitRate'].append(hit_rate)       # Statistic of aggregated Hit Rate
+    stats['Items'].append(total_item )        # Statistic of aggregated Total Num of Items
+    stats['Size'].append(total_size)         # Statistic of aggregated Total Size of Contents
+    stats['Reqs'].append(total_req)         # Statistic of aggregated Total Requests
+
+
 # refreshConfiguration function required by frontend
-""""@managerapp.before_first_request
+@managerapp.before_first_request
 def get_stats_tasks():
     # add the task to scheduler for workers and memcache statistic data updates
-    scheduler.add_job(id='update_worker_count', func=stats_aws_get_workers, trigger='interval',
+    scheduler.add_job(id='insert_dummy_data', func=dummy_data, trigger='interval',
+                      seconds=5)
+"""scheduler.add_job(id='update_worker_count', func=stats_aws_get_workers, trigger='interval',
                       seconds=managerapp.config['JOB_INTERVAL'])
     scheduler.add_job(id='update_cloudwatch_stats', func=stats_aws_get_stats, trigger='interval',
                       seconds=managerapp.config['JOB_INTERVAL'])
@@ -93,7 +114,8 @@ def reset_system():
     The reset commend that delete image data in database and AWS S3
     :return:
     """
-    return None
+    flash("All Application Data are Deleted!")
+    return render_template('autoscalar_config.html', config=scalar_config)
 
 
 @managerapp.route('/clear')
@@ -102,7 +124,8 @@ def clear_memcache():
     The clear commend that clears all the MemCache
     :return:
     """
-    return None
+    flash("All MemCache Cleared!")
+    return render_template('memcache_config.html')
 
 
 
