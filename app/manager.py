@@ -82,7 +82,8 @@ def list_active_instances():
         res = (ec2.describe_instance_status(InstanceIds = [ins['InstanceId']], IncludeAllInstances = True)['InstanceStatuses'])
         if res and (res[0]['InstanceState']['Name'] == "running"):
             result.append(ins['InstanceId'])
-    return  jsonify(result)
+    return jsonify(result)
+
 
 @webapp.route('/describe_all_ins')
 def describe_all_instances():

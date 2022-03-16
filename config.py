@@ -19,6 +19,10 @@ class Config(object):
         'AWS_ACCESS_KEY_ID': '',
         'SECRET_ACCESS_KEY': ''
     }
+    INSTANCE_LIST = {
+        # a dictionary that contains AWS InstanceID and Private IP pairs
+        "i-07e8cb89884703402": ""
+    }
 
 
 

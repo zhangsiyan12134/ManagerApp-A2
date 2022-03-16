@@ -1,6 +1,6 @@
-from app import managerapp, scheduler, DEBUG, stats, scalar_config
+from app import managerapp, scheduler, DEBUG, stats, scalar_config, worker_list
 from flask import render_template, request, flash, jsonify, redirect, url_for, json
-from app.stat_data import stats_aws_get_workers, stats_aws_get_stat
+from app.stat_data import stats_get_worker_list, stats_aws_get_stat
 from random import seed, uniform, randint
 import requests
 
@@ -16,24 +16,30 @@ def dummy_data():
     miss_rate = new_put / total_req
     print(total_item, total_size, total_req, hit_rate, miss_rate)
     stats['Workers'].append(randint(1, 8))       # Statistic of number of workers
+    stats['Workers'].pop(0)
     stats['MissRate'].append(miss_rate)      # Statistic of aggregated Miss Rate
+    stats['MissRate'].pop(0)
     stats['HitRate'].append(hit_rate)       # Statistic of aggregated Hit Rate
+    stats['HitRate'].pop(0)
     stats['Items'].append(total_item )        # Statistic of aggregated Total Num of Items
+    stats['Items'].pop(0)
     stats['Size'].append(total_size)         # Statistic of aggregated Total Size of Contents
+    stats['Size'].pop(0)
     stats['Reqs'].append(total_req)         # Statistic of aggregated Total Requests
-
+    stats['Reqs'].pop(0)
 
 # refreshConfiguration function required by frontend
 @managerapp.before_first_request
 def get_stats_tasks():
     # add the task to scheduler for workers and memcache statistic data updates
-    scheduler.add_job(id='insert_dummy_data', func=dummy_data, trigger='interval',
-                      seconds=5)
-"""scheduler.add_job(id='update_worker_count', func=stats_aws_get_workers, trigger='interval',
+    """scheduler.add_job(id='insert_dummy_data', func=dummy_data, trigger='interval',
+                      seconds=5)"""
+    # add the task to collect worker data, when worker count is greater than 0, another task
+    # that collect the cloudwatch metrics will be added by this function
+    stats_get_worker_list()  # run once at the beginning
+    scheduler.add_job(id='update_worker_count', func=stats_get_worker_list, trigger='interval',
                       seconds=managerapp.config['JOB_INTERVAL'])
-    scheduler.add_job(id='update_cloudwatch_stats', func=stats_aws_get_stats, trigger='interval',
-                      seconds=managerapp.config['JOB_INTERVAL'])
-"""
+
 
 
 @managerapp.route('/')
@@ -61,6 +67,19 @@ def memcache_config():
         requests.post(url)  # send request to autoscalar
         if DEBUG is True:
             print("New MemCache Setting are: ", capacity, "MB, with ", rep_policy)
+    return render_template('memcache_config.html')
+
+
+@managerapp.route('/clear')
+def clear_memcache():
+    """
+    The clear commend that clears all the MemCache
+    :return:
+    """
+    for instance_id in worker_list.keys():
+        req_addr = 'http://' + managerapp.config['INSTANCE_LIST'][instance_id] + ':5000/clear'
+        requests.post(req_addr)
+    flash("All MemCache Cleared!")
     return render_template('memcache_config.html')
 
 
@@ -114,18 +133,42 @@ def reset_system():
     The reset commend that delete image data in database and AWS S3
     :return:
     """
+    req_addr = 'http://' + managerapp.config['FRONTEND_URL'] + '/reset'
+    # TODO: add reset request here
     flash("All Application Data are Deleted!")
     return render_template('autoscalar_config.html', config=scalar_config)
 
 
-@managerapp.route('/clear')
-def clear_memcache():
+@managerapp.route('/start_worker')
+def start_worker():
     """
-    The clear commend that clears all the MemCache
+    Start a worker in manual mode
     :return:
     """
-    flash("All MemCache Cleared!")
-    return render_template('memcache_config.html')
+    if scalar_config['op_mode'] is not 'Manual':
+        if DEBUG is True:
+            print('Switching to Manual Mode')
+        scalar_config['op_mode'] = 'Manual'
+    scalar_config['worker'] += 1
+    # TODO: add request to AutoScalar here
+    # TODO: add start instance here if necessary
+    flash("Switched to Manual Mode. Pool size increased.")
+    return render_template('autoscalar_config.html', config=scalar_config)
 
 
+@managerapp.route('/pause_worker')
+def pause_worker():
+    """
+    Pause a worker in manual mode
+    :return:
+    """
+    if scalar_config['op_mode'] is not 'Manual':
+        if DEBUG is True:
+            print('Switching to Manual Mode')
+        scalar_config['op_mode'] = 'Manual'
+    scalar_config['worker'] -= 1
+    # TODO: add request to AutoScalar here
+    # TODO: add start instance here if necessary
+    flash("Switched to Manual Mode. Pool size increased.")
+    return render_template('autoscalar_config.html', config=scalar_config)
 
