@@ -150,12 +150,16 @@ def start_worker():
     """
     if scalar_config['op_mode'] is not 'Manual':
         scalar_config['op_mode'] = 'Manual'
-    scalar_config['worker'] += 1
-    # TODO: add request to AutoScalar here
-    # TODO: add start instance here if necessary
+    if scalar_config['worker'] < 8:
+        scalar_config['worker'] += 1
+        # TODO: add request to AutoScalar here
+        # TODO: add start instance here if necessary
+        flash("Switched to Manual Mode. Pool size increased.")
+    else:
+        flash("Maximum Worker is Running!")
+
     if DEBUG is True:
         print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
-    flash("Switched to Manual Mode. Pool size increased.")
     return render_template('autoscalar_config.html', config=scalar_config)
 
 
@@ -167,11 +171,15 @@ def pause_worker():
     """
     if scalar_config['op_mode'] is not 'Manual':
         scalar_config['op_mode'] = 'Manual'
-    scalar_config['worker'] -= 1
-    # TODO: add request to AutoScalar here
-    # TODO: add start instance here if necessary
+    if scalar_config['worker'] > 1:
+        scalar_config['worker'] -= 1
+        # TODO: add request to AutoScalar here
+        # TODO: add start instance here if necessary
+        flash("Switched to Manual Mode. Pool size decreased.")
+    else:
+        flash("At least one worker is required to running.")
+
     if DEBUG is True:
         print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
-    flash("Switched to Manual Mode. Pool size increased.")
     return render_template('autoscalar_config.html', config=scalar_config)
 
