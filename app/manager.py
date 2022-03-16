@@ -169,6 +169,7 @@ def stop_background_job():
     Message = ("Auto-scaling has stopped")
     return render_template('m_main.html',Stop_message = json.dumps(Message))
 
+
 @webapp.route('/stop_manager')
 def stop_manager():
     global start 

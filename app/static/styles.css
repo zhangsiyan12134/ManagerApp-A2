@@ -18,6 +18,15 @@ h3 {
     align-items: center;
 }
 
+.navbar{
+    list-style-type: none;
+    font-size: 25px;
+    padding-top:10px;
+    margin: 0;
+    height: 80px;
+    background-color: #333;
+}
+
 .menu{
     float: right;
     margin-right: 20%;
@@ -65,7 +74,7 @@ h3 {
     height: 40px;
     font-size: 20px;
     float: center;
-    margin-left: 400px;
+    margin-left: 0px;
     border-radius: 5px;
     background-color:wheat;
 }
@@ -75,7 +84,7 @@ h3 {
 }
 
 
-ul {
+.navbar ul {
     list-style-type: none;
     font-size: 25px;
     padding-top:10px;
@@ -84,7 +93,7 @@ ul {
     background-color: #333;
 }
 
-li {
+.navbar li {
     float:left;
     display: inline;
     color:cornsilk;  
@@ -96,11 +105,11 @@ li {
    color:cornsilk;  
 }
 
-li a{
+.navbar li a{
     text-decoration: none;
     color:AntiqueWhite;
 }
 
-li a:hover{
+.navbar li a:hover{
     background-color:dimgray;
 }

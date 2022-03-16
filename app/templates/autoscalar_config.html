@@ -21,17 +21,20 @@
         </br>
         <div id="manual_fields" style="display:none">
             <label for="pool_size">Pool Size: </label></br>
-            <input type="number" id="pool_size" name="pool_size" value="1" min="1" max="8"/>
+            <input type="number" id="pool_size" name="pool_size" value={{config['worker']}} min="1" max="8" oninput="button_action(this.value)"/>
+            </br></br>
+            <button type="button" onclick="plus()">+</button>
+            <button type="button" onclick="minus()">-</button></br></br>
         </div>
         <div id="auto_fields" style="display:none">
             <label for="miss_max">Maximum Miss Rate: </label></br>
-            <input type="text" id="miss_max" placeholder="0.8" name="miss_max"></br>
-            <label for="miss_min">Maximum Miss Rate: </label></br>
-            <input type="text" id="miss_min" placeholder="0.2" name="miss_min"></br>
-            <label for="exp_ratio">Maximum Miss Rate: </label></br>
-            <input type="text" id="exp_ratio" placeholder="2" name="exp_ratio"></br>
-            <label for="shr_ratio">Maximum Miss Rate: </label></br>
-            <input type="text" id="shr_ratio" placeholder="0.5" name="shr_ratio"></br>
+            <input type="text" id="miss_max" placeholder={{config['miss_max']}} name="miss_max"></br>
+            <label for="miss_min">Minimum Miss Rate: </label></br>
+            <input type="text" id="miss_min" placeholder={{config['miss_min']}} name="miss_min"></br>
+            <label for="exp_ratio">Expand Ratio: </label></br>
+            <input type="text" id="exp_ratio" placeholder={{config['exp_ratio']}} name="exp_ratio"></br>
+            <label for="shr_ratio">Shrink Ratio: </label></br>
+            <input type="text" id="shr_ratio" placeholder={{config['shr_ratio']}} name="shr_ratio"></br>
         </div>
         </br>
         </br>
@@ -48,5 +51,25 @@
                 $("#auto_fields").toggle($(this).val() == "Automatic");
             }
         );
+
+        function button_action(){
+            var one = document.getElementById("pool_size").value;
+        }
+
+        function plus(){
+            if (document.getElementById("pool_size").value < 8)
+            {
+                document.getElementById("pool_size").value++;
+            }
+            run();
+        }
+
+        function minus(){
+            if (document.getElementById("pool_size").value > 1)
+            {
+                document.getElementById("pool_size").value--;
+            }
+           run();
+        }
     </script>
 {% endblock %}
