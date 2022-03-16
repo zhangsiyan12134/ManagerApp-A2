@@ -105,21 +105,24 @@ def autoscalar_config():
             miss_min_str = request.form.get('miss_min')
             exp_ratio_str = request.form.get('exp_ratio')
             shr_ratio_str = request.form.get('shr_ratio')
-            miss_max = float(miss_max_str)
-            miss_min = float(miss_min_str)
-            exp_ratio = float(exp_ratio_str)
-            shr_ratio = float(shr_ratio_str)
-            if DEBUG is True:
-                print('Mode: ', op_mode_str)
-                print('Miss Rate Max: ', miss_max, 'Miss Rate Min: ', miss_min)
-                print('Expan Ratio: ', exp_ratio, 'Shrink Ratio ', shr_ratio)
-            scalar_config['op_mode'] = op_mode_str
-            scalar_config['miss_max'] = miss_max
-            scalar_config['miss_min'] = miss_min
-            scalar_config['exp_ratio'] = exp_ratio
-            scalar_config['shr_ratio'] = shr_ratio
-            # TODO: send request to autoscalar here
-            flash("Switched to Auto Mode! Applying settings to the AutoScalar")
+            if (not miss_max_str) or (not miss_min_str) or (not exp_ratio_str) or (not shr_ratio_str):
+                flash("Required Parameter(s) are missing!")
+            else:
+                miss_max = float(miss_max_str)
+                miss_min = float(miss_min_str)
+                exp_ratio = float(exp_ratio_str)
+                shr_ratio = float(shr_ratio_str)
+                if DEBUG is True:
+                    print('Mode: ', op_mode_str)
+                    print('Miss Rate Max: ', miss_max, 'Miss Rate Min: ', miss_min)
+                    print('Expan Ratio: ', exp_ratio, 'Shrink Ratio ', shr_ratio)
+                scalar_config['op_mode'] = op_mode_str
+                scalar_config['miss_max'] = miss_max
+                scalar_config['miss_min'] = miss_min
+                scalar_config['exp_ratio'] = exp_ratio
+                scalar_config['shr_ratio'] = shr_ratio
+                # TODO: send request to autoscalar here
+                flash("Switched to Auto Mode! Applying settings to the AutoScalar")
         elif DEBUG is True:
             print('Error: Unknown AutoScalar Operation Mode')
     return render_template('autoscalar_config.html', config=scalar_config)
