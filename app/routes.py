@@ -79,6 +79,8 @@ def clear_memcache():
     for instance_id in worker_list.keys():
         req_addr = 'http://' + managerapp.config['INSTANCE_LIST'][instance_id] + ':5000/clear'
         requests.post(req_addr)
+    if DEBUG is True:
+        print('Clear Requests are sent to workers')
     flash("All MemCache Cleared!")
     return render_template('memcache_config.html')
 
@@ -92,22 +94,17 @@ def autoscalar_config():
     """
     if request.method == 'POST':
         op_mode_str = request.form.get('op_mode')
-        pool_size_str = request.form.get('pool_size')
-        miss_max_str = request.form.get('miss_max')
-        miss_min_str = request.form.get('miss_min')
-        exp_ratio_str = request.form.get('exp_ratio')
-        shr_ratio_str = request.form.get('shr_ratio')
         if op_mode_str == 'Manual':
-            pool_size = int(pool_size_str)
-            if 0 < int(pool_size) < 9:
-                if DEBUG is True:
-                    print('Mode: ', op_mode_str, ', Pool Size: ', pool_size)
-                scalar_config['op_mode'] = op_mode_str
-                scalar_config['worker'] = pool_size
-                flash("Switched to Manual Mode! Applying changes to worker pool...")
-            elif DEBUG is True:
-                print('Error: Invalid Number of Instance is given')
+            scalar_config['op_mode'] = op_mode_str
+            # TODO: send request to autoscalar here
+            if DEBUG is True:
+                print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
+            flash("Switched to Manual Mode!")
         elif op_mode_str == 'Automatic':
+            miss_max_str = request.form.get('miss_max')
+            miss_min_str = request.form.get('miss_min')
+            exp_ratio_str = request.form.get('exp_ratio')
+            shr_ratio_str = request.form.get('shr_ratio')
             miss_max = float(miss_max_str)
             miss_min = float(miss_min_str)
             exp_ratio = float(exp_ratio_str)
@@ -121,6 +118,7 @@ def autoscalar_config():
             scalar_config['miss_min'] = miss_min
             scalar_config['exp_ratio'] = exp_ratio
             scalar_config['shr_ratio'] = shr_ratio
+            # TODO: send request to autoscalar here
             flash("Switched to Auto Mode! Applying settings to the AutoScalar")
         elif DEBUG is True:
             print('Error: Unknown AutoScalar Operation Mode')
@@ -135,40 +133,42 @@ def reset_system():
     """
     req_addr = 'http://' + managerapp.config['FRONTEND_URL'] + '/reset'
     # TODO: add reset request here
+    if DEBUG is True:
+        print('Reset Requests are sent to FrontEndApp')
     flash("All Application Data are Deleted!")
     return render_template('autoscalar_config.html', config=scalar_config)
 
 
-@managerapp.route('/start_worker')
+@managerapp.route('/start_worker', methods=['GET', 'POST'])
 def start_worker():
     """
     Start a worker in manual mode
     :return:
     """
     if scalar_config['op_mode'] is not 'Manual':
-        if DEBUG is True:
-            print('Switching to Manual Mode')
         scalar_config['op_mode'] = 'Manual'
     scalar_config['worker'] += 1
     # TODO: add request to AutoScalar here
     # TODO: add start instance here if necessary
+    if DEBUG is True:
+        print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
     flash("Switched to Manual Mode. Pool size increased.")
     return render_template('autoscalar_config.html', config=scalar_config)
 
 
-@managerapp.route('/pause_worker')
+@managerapp.route('/pause_worker', methods=['GET', 'POST'])
 def pause_worker():
     """
     Pause a worker in manual mode
     :return:
     """
     if scalar_config['op_mode'] is not 'Manual':
-        if DEBUG is True:
-            print('Switching to Manual Mode')
         scalar_config['op_mode'] = 'Manual'
     scalar_config['worker'] -= 1
     # TODO: add request to AutoScalar here
     # TODO: add start instance here if necessary
+    if DEBUG is True:
+        print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
     flash("Switched to Manual Mode. Pool size increased.")
     return render_template('autoscalar_config.html', config=scalar_config)
 
