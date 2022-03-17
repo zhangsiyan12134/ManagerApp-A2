@@ -58,7 +58,7 @@
     displayHistory(hitrateData, "HitRateChart", "Hit Rate in Last 30 Mins", "Time (Min)", "Miss Rate (%)");
     displayHistory(totalitemData, "TotalItemChart", "Items in MemCache in Last 30 Mins", "Time (Min)", "Number of Items");
     displayHistory(totalsizeData, "TotalSizeChart", "Content Size in MemCache in Last 30 Mins", "Time (Min)", "Size of Contents");
-    displayHistory(TotalReqChart, "TotalReqChart", "Requests in Last 30 Mins", "Time (Min)", "Number of Requests");
+    displayHistory(totalreqData, "TotalReqChart", "Requests in Last 30 Mins", "Time (Min)", "Number of Requests");
     if(!interval_id){
         interval_id = setInterval(function () {
             location.reload("/showTable");

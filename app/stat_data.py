@@ -1,6 +1,7 @@
 from app import managerapp, scheduler, stats, worker_list, DEBUG, ec2_resource, cloudwatch_client
-from app.ec2_access import ec2_start_instance, ec2_pause_instance
+from app.db_access import update_rds_worker_count
 from datetime import datetime, timedelta
+
 
 def stats_append(datatype, data):
     """
@@ -127,6 +128,7 @@ def stats_get_worker_list():
     stats_append('Workers', worker_cnt)
     if DEBUG is True:
         print('Worker data collection completed')
+    update_rds_worker_count(worker_cnt)
 
     '''
     The following section resume/add the job to collect CloudWatch Metrics

@@ -6,6 +6,10 @@ import requests
 
 
 def dummy_data():
+    """
+    Function that generate dummy data to test graphs
+    :return:
+    """
     new_req = randint(0, 2)
     new_put = randint(0, 2)
 
@@ -28,6 +32,7 @@ def dummy_data():
     stats['Reqs'].append(total_req)         # Statistic of aggregated Total Requests
     stats['Reqs'].pop(0)
 
+
 # refreshConfiguration function required by frontend
 @managerapp.before_first_request
 def get_stats_tasks():
@@ -39,7 +44,6 @@ def get_stats_tasks():
     stats_get_worker_list()  # run once at the beginning
     scheduler.add_job(id='update_worker_count', func=stats_get_worker_list, trigger='interval',
                       seconds=managerapp.config['JOB_INTERVAL'])
-
 
 
 @managerapp.route('/')
@@ -96,7 +100,16 @@ def autoscalar_config():
         op_mode_str = request.form.get('op_mode')
         if op_mode_str == 'Manual':
             scalar_config['op_mode'] = op_mode_str
-            # TODO: send request to autoscalar here
+            # Send the new configuration to AutoScalar
+            req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/setting'
+            response = {
+                'mode': 'Manual',
+                'max_miss': 0,
+                'min_miss': 0,
+                'expand_ratio': 0,
+                'shrink_ratio': 0
+            }
+            requests.post(req_addr, data=response)
             if DEBUG is True:
                 print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
             flash("Switched to Manual Mode!")
@@ -121,7 +134,15 @@ def autoscalar_config():
                 scalar_config['miss_min'] = miss_min
                 scalar_config['exp_ratio'] = exp_ratio
                 scalar_config['shr_ratio'] = shr_ratio
-                # TODO: send request to autoscalar here
+                req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/setting'
+                response = {
+                    'mode': 'Automatic',
+                    'max_miss': miss_max,
+                    'min_miss': miss_min,
+                    'expand_ratio': exp_ratio,
+                    'shrink_ratio': shr_ratio
+                }
+                requests.post(req_addr, data=response)
                 flash("Switched to Auto Mode! Applying settings to the AutoScalar")
         elif DEBUG is True:
             print('Error: Unknown AutoScalar Operation Mode')
@@ -134,8 +155,8 @@ def reset_system():
     The reset commend that delete image data in database and AWS S3
     :return:
     """
-    req_addr = 'http://' + managerapp.config['FRONTEND_URL'] + '/reset'
-    # TODO: add reset request here
+    req_addr = 'http://' + managerapp.config['FRONTEND_URL'] + '/api/manager/clear'
+    requests.post(req_addr)
     if DEBUG is True:
         print('Reset Requests are sent to FrontEndApp')
     flash("All Application Data are Deleted!")
@@ -154,7 +175,7 @@ def start_worker():
         scalar_config['worker'] += 1
         # TODO: add request to AutoScalar here
         # TODO: add start instance here if necessary
-        flash("Switched to Manual Mode. Pool size increased.")
+        flash("Switched to Manual Mode. Please waiting for worker to boot up.")
     else:
         flash("Maximum Worker is Running!")
 
@@ -175,7 +196,7 @@ def pause_worker():
         scalar_config['worker'] -= 1
         # TODO: add request to AutoScalar here
         # TODO: add start instance here if necessary
-        flash("Switched to Manual Mode. Pool size decreased.")
+        flash("Switched to Manual Mode. Please waiting for worker to stop.")
     else:
         flash("At least one worker is required to running.")
 
