@@ -1,6 +1,7 @@
 from app import managerapp, scheduler, DEBUG, stats, scalar_config, worker_list
 from flask import render_template, request, flash, jsonify, redirect, url_for, json
 from app.stat_data import stats_get_worker_list, stats_aws_get_stat
+from app.db_access import update_rds_memcache_config
 from random import seed, uniform, randint
 import requests
 
@@ -66,11 +67,17 @@ def memcache_config():
     if request.method == 'POST':
         capacity = request.form.get('capacity')
         rep_policy = request.form.get('rep_policy')
-        # update the latest memcache configuration in database here
-        url = managerapp.config['AUTOSCALAR_URL'] + "/refreshconfiguration"
-        requests.post(url)  # send request to autoscalar
-        if DEBUG is True:
-            print("New MemCache Setting are: ", capacity, "MB, with ", rep_policy)
+        if capacity and rep_policy:
+            # update the latest memcache configuration in database
+            update_rds_memcache_config(int(capacity), rep_policy)
+            for instance_id in worker_list.keys():
+                req_addr = 'http://' + managerapp.config['INSTANCE_LIST'][instance_id] + ':5001/refreshconfiguration'
+                requests.post(req_addr)
+            if DEBUG is True:
+                print("New MemCache Setting are: ", capacity, "MB, with ", rep_policy)
+            flash("Configuration Applied!")
+        else:
+            flash("Required Parameter(s) are missing!")
     return render_template('memcache_config.html')
 
 
@@ -81,7 +88,7 @@ def clear_memcache():
     :return:
     """
     for instance_id in worker_list.keys():
-        req_addr = 'http://' + managerapp.config['INSTANCE_LIST'][instance_id] + ':5000/clear'
+        req_addr = 'http://' + managerapp.config['INSTANCE_LIST'][instance_id] + ':5001/clear'
         requests.post(req_addr)
     if DEBUG is True:
         print('Clear Requests are sent to workers')

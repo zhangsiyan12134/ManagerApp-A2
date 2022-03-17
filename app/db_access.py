@@ -1,5 +1,5 @@
 from flask import g
-from app import managerapp, DEBUG, stat_data
+from app import managerapp, DEBUG, stat_data, worker_list
 import mysql.connector
 from mysql.connector import errorcode
 
@@ -30,7 +30,7 @@ def update_rds_worker_count(worker_cnt):
     :return:
     """
     cnx = connect_to_database()  # Create connection to db
-    cursor = cnx.cursor()
+    cursor = cnx.cursor(buffered=True)
     query = "SELECT num_instances FROM ECE1779.cachepool_stats;"
     cursor.execute(query)
     row = cursor.fetchone()  # Retrieve the first row that contains the count
@@ -51,3 +51,25 @@ def update_rds_worker_count(worker_cnt):
     elif DEBUG is True:
         print('Count on RDS is update, no need to update.')
 
+
+def update_rds_memcache_config(capacity, rep_policy):
+    cnx = connect_to_database()  # Create connection to db
+    cursor = cnx.cursor(buffered=True)
+    query = "SELECT * FROM ECE1779.cache_config;"
+    cursor.execute(query)
+    row = cursor.fetchone()  # Retrieve the first row
+    if capacity and rep_policy:
+        if row is None:  # create the entry if the table is empty
+            query = "INSERT INTO ECE1779.cache_config (capacity, rep_policy) VALUE (%s, %s);"
+            cursor.execute(query, (capacity, rep_policy))
+            cnx.commit()
+            if DEBUG is True:
+                print('No configuration is found, create new: ', capacity, 'MB, ', rep_policy)
+        else:
+            query = "UPDATE ECE1779.cache_config SET capacity = %s, rep_policy = %s;"
+            cursor.execute(query, (capacity, rep_policy))
+            cnx.commit()
+            if DEBUG is True:
+                print('Configuration updated! New: ', capacity, 'MB, ', rep_policy)
+    elif DEBUG is True:
+        print('Error: Missing parameter(s) when update Memcache Config')
