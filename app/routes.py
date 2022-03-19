@@ -108,14 +108,11 @@ def autoscalar_config():
         op_mode_str = request.form.get('op_mode')
         if op_mode_str == 'Manual':
             scalar_config['op_mode'] = op_mode_str
-            # Send the new configuration to AutoScalar
-            req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/setting'
+            # Send the mode change to AutoScaler
+            req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/'
             response = {
                 'mode': 'Manual',
-                'max_miss': 0,
-                'min_miss': 0,
-                'expand_ratio': 0,
-                'shrink_ratio': 0
+                'add': 0
             }
             requests.post(req_addr, data=response)
             if DEBUG is True:
@@ -142,7 +139,7 @@ def autoscalar_config():
                 scalar_config['miss_min'] = miss_min
                 scalar_config['exp_ratio'] = exp_ratio
                 scalar_config['shr_ratio'] = shr_ratio
-                req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/setting'
+                req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/'
                 response = {
                     'mode': 'Automatic',
                     'max_miss': miss_max,
@@ -192,9 +189,15 @@ def start_worker():
     else:
         if scalar_config['worker'] < 8:
             scalar_config['worker'] += 1
-            # TODO: add request to AutoScalar here
-            # TODO: add start instance here if necessary
-            ec2_start_instance(stopped_worker[0])
+            # Send the new configuration to AutoScalar
+            req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/'
+            response = {
+                'mode': 'Manual',
+                'add': 1
+            }
+            requests.post(req_addr, data=response)
+            # NOTE: Manual start a EC2 instance is handled by AutoScaler now
+            # ec2_start_instance(stopped_worker[0])
             flash("Switched to Manual Mode. Please waiting for worker to boot up.")
         else:
             flash("Maximum Worker is Running!")
@@ -225,9 +228,15 @@ def pause_worker():
             scalar_config['op_mode'] = 'Manual'
         if scalar_config['worker'] > 1:
             scalar_config['worker'] -= 1
-            # TODO: add request to AutoScalar here
-            # TODO: add start instance here if necessary
-            ec2_pause_instance(running_worker[-1])
+            # Send the new configuration to AutoScalar
+            req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/'
+            response = {
+                'mode': 'Manual',
+                'add': -1
+            }
+            requests.post(req_addr, data=response)
+            # NOTE: Manual start a EC2 instance is handled by AutoScaler now
+            # ec2_pause_instance(running_worker[-1])
             flash("Switched to Manual Mode. Please waiting for worker to stop.")
         else:
             flash("At least one worker is required to running.")

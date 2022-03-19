@@ -145,7 +145,8 @@ def stats_get_worker_list():
     stats_append('Workers', worker_cnt)
     if DEBUG is True:
         print('Worker data collection completed')
-    update_rds_worker_count(worker_cnt)
+    # NOTE: Worker count on RDS update by AutoScaler now
+    # update_rds_worker_count(worker_cnt)
 
     '''
     The following section resume/add the job to collect CloudWatch Metrics

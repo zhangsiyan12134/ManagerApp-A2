@@ -46,7 +46,7 @@ def update_rds_worker_count(worker_cnt):
             query = "UPDATE ECE1779.cachepool_stats SET num_instances = %s;"
             cursor.execute(query, (worker_cnt,))
             cnx.commit()
-            # TODO: send request to FrontendApp to notify the changes
+            # NOTE: Worker count on RDS update by AutoScaler now
             if DEBUG is True:
                 print('Count on RDS is outdated. Value', worker_cnt, 'is updated.')
         elif DEBUG is True:
