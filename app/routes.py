@@ -227,7 +227,7 @@ def pause_worker():
             scalar_config['worker'] -= 1
             # TODO: add request to AutoScalar here
             # TODO: add start instance here if necessary
-            ec2_pause_instance(running_worker[0])
+            ec2_pause_instance(running_worker[-1])
             flash("Switched to Manual Mode. Please waiting for worker to stop.")
         else:
             flash("At least one worker is required to running.")
