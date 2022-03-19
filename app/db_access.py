@@ -34,23 +34,25 @@ def update_rds_worker_count(worker_cnt):
     query = "SELECT num_instances FROM ECE1779.cachepool_stats;"
     cursor.execute(query)
     row = cursor.fetchone()  # Retrieve the first row that contains the count
-    # Check if database has the count
-    if row is None:
-        query = "INSERT INTO ECE1779.cachepool_stats (num_instances) VALUE (%s);"
-        cursor.execute(query, (worker_cnt,))
-        cnx.commit()
-        if DEBUG is True:
-            print('No valid count exist on RDS. New value', worker_cnt, 'is added.')
-    elif row[0] != worker_cnt:
-        query = "UPDATE ECE1779.cachepool_stats SET num_instances = %s;"
-        cursor.execute(query, (worker_cnt,))
-        cnx.commit()
-        # TODO: send request to FrontendApp to notify the changes
-        if DEBUG is True:
-            print('Count on RDS is outdated. Value', worker_cnt, 'is updated.')
+    if worker_cnt is not None:
+        # Check if database has the count
+        if row is None:
+            query = "INSERT INTO ECE1779.cachepool_stats (num_instances) VALUE (%s);"
+            cursor.execute(query, (worker_cnt,))
+            cnx.commit()
+            if DEBUG is True:
+                print('No valid count exist on RDS. New value', worker_cnt, 'is added.')
+        elif row[0] != worker_cnt:
+            query = "UPDATE ECE1779.cachepool_stats SET num_instances = %s;"
+            cursor.execute(query, (worker_cnt,))
+            cnx.commit()
+            # TODO: send request to FrontendApp to notify the changes
+            if DEBUG is True:
+                print('Count on RDS is outdated. Value', worker_cnt, 'is updated.')
+        elif DEBUG is True:
+            print('Count on RDS is update, no need to update.')
     elif DEBUG is True:
-        print('Count on RDS is update, no need to update.')
-
+        print('Error: Parameter is None')
 
 def update_rds_memcache_config(capacity, rep_policy):
     cnx = connect_to_database()  # Create connection to db

@@ -1,7 +1,8 @@
 from app import managerapp, scheduler, DEBUG, stats, scalar_config, worker_list
 from flask import render_template, request, flash, jsonify, redirect, url_for, json
-from app.stat_data import stats_get_worker_list, stats_aws_get_stat
+from app.stat_data import stats_get_worker_list, stats_aws_get_worker_list
 from app.db_access import update_rds_memcache_config
+from app.ec2_access import ec2_start_instance, ec2_pause_instance
 from random import seed, uniform, randint
 import requests
 
@@ -176,18 +177,30 @@ def start_worker():
     Start a worker in manual mode
     :return:
     """
-    if scalar_config['op_mode'] is not 'Manual':
+    if scalar_config['op_mode'] != 'Manual':
         scalar_config['op_mode'] = 'Manual'
-    if scalar_config['worker'] < 8:
-        scalar_config['worker'] += 1
-        # TODO: add request to AutoScalar here
-        # TODO: add start instance here if necessary
-        flash("Switched to Manual Mode. Please waiting for worker to boot up.")
-    else:
-        flash("Maximum Worker is Running!")
-
+    # get the current worker lists
+    stopped_worker = stats_aws_get_worker_list('stopped')
+    pending_worker = stats_aws_get_worker_list('pending')
     if DEBUG is True:
-        print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
+        print('There are', len(stopped_worker), 'running workers, and ', len(pending_worker))
+
+    if pending_worker:
+        flash("A worker status is pending, please try again later")
+    elif not stopped_worker:
+        flash("No free worker is available at the moment.")
+    else:
+        if scalar_config['worker'] < 8:
+            scalar_config['worker'] += 1
+            # TODO: add request to AutoScalar here
+            # TODO: add start instance here if necessary
+            ec2_start_instance(stopped_worker[0])
+            flash("Switched to Manual Mode. Please waiting for worker to boot up.")
+        else:
+            flash("Maximum Worker is Running!")
+
+        if DEBUG is True:
+            print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
     return render_template('autoscalar_config.html', config=scalar_config)
 
 
@@ -197,17 +210,29 @@ def pause_worker():
     Pause a worker in manual mode
     :return:
     """
-    if scalar_config['op_mode'] is not 'Manual':
-        scalar_config['op_mode'] = 'Manual'
-    if scalar_config['worker'] > 1:
-        scalar_config['worker'] -= 1
-        # TODO: add request to AutoScalar here
-        # TODO: add start instance here if necessary
-        flash("Switched to Manual Mode. Please waiting for worker to stop.")
-    else:
-        flash("At least one worker is required to running.")
-
+    # get the current worker lists
+    running_worker = stats_aws_get_worker_list('running')
+    pending_worker = stats_aws_get_worker_list('pending | starting | stopping | shutting-down')
     if DEBUG is True:
-        print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
+        print('There are', len(running_worker), 'running workers, and ', len(pending_worker))
+
+    if pending_worker:
+        flash("A worker status is pending, please try again later")
+    elif not running_worker:
+        flash("All worker is stopped at the moment.")
+    else:
+        if scalar_config['op_mode'] != 'Manual':
+            scalar_config['op_mode'] = 'Manual'
+        if scalar_config['worker'] > 1:
+            scalar_config['worker'] -= 1
+            # TODO: add request to AutoScalar here
+            # TODO: add start instance here if necessary
+            ec2_pause_instance(running_worker[0])
+            flash("Switched to Manual Mode. Please waiting for worker to stop.")
+        else:
+            flash("At least one worker is required to running.")
+        if DEBUG is True:
+            print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
+
     return render_template('autoscalar_config.html', config=scalar_config)
 

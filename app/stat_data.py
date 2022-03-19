@@ -53,6 +53,20 @@ def stats_aws_get_workers(status):
     return instances
 
 
+def stats_aws_get_worker_list(status):
+    """
+    A small help function to get a list of workers' id with the given type
+    This function is not called by scheduler
+    :param status: str
+    :return: list
+    """
+    avail_list = []
+    instance_list = stats_aws_get_workers(status)
+    for instance in instance_list:
+        avail_list.append(instance.id)
+    return avail_list
+
+
 def stats_aws_get_stat(worker_cnt, metric_type):
     """
     Calculate the average metric from all running instances for last minute
@@ -82,7 +96,10 @@ def stats_aws_get_stat(worker_cnt, metric_type):
             total += value['Datapoints'][0]['Average']
     if DEBUG is True:
         print('CloudWatch data collection completed: ')
-    return total / worker_cnt
+    if metric_type == 'HitRate' or metric_type == 'MissRate':
+        return total / worker_cnt   # aggregate MissRate/HitRate as average value
+    else:
+        return total    # aggregate everything else as total value
 
 
 def stats_aws_get_stats():
