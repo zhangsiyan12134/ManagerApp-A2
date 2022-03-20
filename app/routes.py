@@ -135,7 +135,7 @@ def autoscalar_config():
             req_addr = managerapp.config['AUTOSCALAR_URL']
             response = {
                 'mode': 'Manual',
-                'add': 0
+                'add': '0'
             }
             send_post_request_with_body(req_addr, response)
             if DEBUG is True:
@@ -165,10 +165,10 @@ def autoscalar_config():
                 req_addr = managerapp.config['AUTOSCALAR_URL']
                 response = {
                     'mode': 'Automatic',
-                    'max_miss': miss_max,
-                    'min_miss': miss_min,
-                    'expand_ratio': exp_ratio,
-                    'shrink_ratio': shr_ratio
+                    'max_miss': miss_max_str,
+                    'min_miss': miss_min_str,
+                    'expand_ratio': exp_ratio_str,
+                    'shrink_ratio': shr_ratio_str
                 }
                 send_post_request_with_body(req_addr, response)
                 flash("Switched to Auto Mode! Applying settings to the AutoScalar")
@@ -216,7 +216,7 @@ def start_worker():
             req_addr = managerapp.config['AUTOSCALAR_URL']
             response = {
                 'mode': 'Manual',
-                'add': 1
+                'add': '1'
             }
             send_post_request_with_body(req_addr, response)
             # NOTE: Manual start a EC2 instance is handled by AutoScaler now
@@ -255,7 +255,7 @@ def pause_worker():
             req_addr = managerapp.config['AUTOSCALAR_URL']
             response = {
                 'mode': 'Manual',
-                'add': -1
+                'add': '-1'
             }
             send_post_request_with_body(req_addr, response)
             # NOTE: Manual start a EC2 instance is handled by AutoScaler now
