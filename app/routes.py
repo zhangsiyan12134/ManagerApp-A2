@@ -7,6 +7,13 @@ from random import seed, uniform, randint
 import requests
 
 
+def send_post_request(addr, data):
+    try:
+        r = requests.post(addr, data=data)
+    except requests.exceptions.RequestException as e:
+        print(e)
+
+
 def dummy_data():
     """
     Function that generate dummy data to test graphs
@@ -73,7 +80,7 @@ def memcache_config():
             update_rds_memcache_config(int(capacity), rep_policy)
             for instance_id in worker_list.keys():
                 req_addr = 'http://' + managerapp.config['INSTANCE_LIST'][instance_id] + ':5001/refreshconfiguration'
-                requests.post(req_addr)
+                send_post_request(req_addr, None)
             if DEBUG is True:
                 print("New MemCache Setting are: ", capacity, "MB, with ", rep_policy)
             flash("Configuration Applied!")
@@ -90,7 +97,7 @@ def clear_memcache():
     """
     for instance_id in worker_list.keys():
         req_addr = 'http://' + managerapp.config['INSTANCE_LIST'][instance_id] + ':5001/clear'
-        requests.post(req_addr)
+        send_post_request(req_addr, None)
     if DEBUG is True:
         print('Clear Requests are sent to workers')
     flash("All MemCache Cleared!")
@@ -114,7 +121,7 @@ def autoscalar_config():
                 'mode': 'Manual',
                 'add': 0
             }
-            requests.post(req_addr, data=response)
+            send_post_request(req_addr, response)
             if DEBUG is True:
                 print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
             flash("Switched to Manual Mode!")
@@ -147,7 +154,7 @@ def autoscalar_config():
                     'expand_ratio': exp_ratio,
                     'shrink_ratio': shr_ratio
                 }
-                requests.post(req_addr, data=response)
+                send_post_request(req_addr, response)
                 flash("Switched to Auto Mode! Applying settings to the AutoScalar")
         elif DEBUG is True:
             print('Error: Unknown AutoScalar Operation Mode')
@@ -161,7 +168,7 @@ def reset_system():
     :return:
     """
     req_addr = managerapp.config['FRONTEND_URL'] + 'api/manager/clear'
-    requests.post(req_addr)
+    send_post_request(req_addr, None)
     if DEBUG is True:
         print('Reset Requests are sent to FrontEndApp')
     flash("All Application Data are Deleted!")
@@ -195,7 +202,7 @@ def start_worker():
                 'mode': 'Manual',
                 'add': 1
             }
-            requests.post(req_addr, data=response)
+            send_post_request(req_addr, response)
             # NOTE: Manual start a EC2 instance is handled by AutoScaler now
             # ec2_start_instance(stopped_worker[0])
             flash("Switched to Manual Mode. Please waiting for worker to boot up.")
@@ -234,7 +241,7 @@ def pause_worker():
                 'mode': 'Manual',
                 'add': -1
             }
-            requests.post(req_addr, data=response)
+            send_post_request(req_addr, response)
             # NOTE: Manual start a EC2 instance is handled by AutoScaler now
             # ec2_pause_instance(running_worker[-1])
             flash("Switched to Manual Mode. Please waiting for worker to stop.")
