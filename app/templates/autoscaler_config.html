@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <h2>AutoScalar Configurations</h2>
+    <h2>AutoScaler Configurations</h2>
     <div class="menu">
     <a href="/clear">
         <button type="button">Clear All Data</button>
@@ -13,7 +13,7 @@
     <br/>
     <div class="config">
     <p>Please select an operation mode:</p>
-    <form action="/autoscalar_config" method="post">
+    <form action="/autoscaler_config" method="post">
         <input type="radio" id="manual" name="op_mode" value="Manual">
         <label for="manual">Manual</label>
         <input type="radio" id="auto" name="op_mode" value="Automatic">

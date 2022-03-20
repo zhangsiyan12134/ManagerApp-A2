@@ -6,7 +6,7 @@ import boto3
 managerapp = Flask(__name__)
 
 global stats
-global scalar_config
+global scaler_config
 global worker_list
 global DEBUG
 
@@ -14,13 +14,13 @@ DEBUG = True
 
 worker_list = {}    # {instance_id: 0|1}: 0=stopped; 1=running
 
-scalar_config = {}
-scalar_config['op_mode'] = 'Manual'
-scalar_config['worker'] = 1
-scalar_config['miss_max'] = 0.8
-scalar_config['miss_min'] = 0.2
-scalar_config['exp_ratio'] = 2.0
-scalar_config['shr_ratio'] = 0.5
+scaler_config = {}
+scaler_config['op_mode'] = 'Manual'
+scaler_config['worker'] = 1
+scaler_config['miss_max'] = 0.8
+scaler_config['miss_min'] = 0.2
+scaler_config['exp_ratio'] = 2.0
+scaler_config['shr_ratio'] = 0.5
 
 stats = {}
 stats['Workers'] = [1] * 30     # Statistic of number of workers

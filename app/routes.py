@@ -1,4 +1,4 @@
-from app import managerapp, scheduler, DEBUG, stats, scalar_config, worker_list
+from app import managerapp, scheduler, DEBUG, stats, scaler_config, worker_list
 from flask import render_template, request, flash, jsonify, redirect, url_for, json
 from app.stat_data import stats_get_worker_list, stats_aws_get_worker_list
 from app.db_access import update_rds_memcache_config
@@ -120,26 +120,26 @@ def clear_memcache():
     return render_template('memcache_config.html')
 
 
-@managerapp.route('/autoscalar_config', methods=['GET', 'POST'])
-def autoscalar_config():
+@managerapp.route('/autoscaler_config', methods=['GET', 'POST'])
+def autoscaler_config():
     """
-    The configuration page of the AutoScalar rendered here
+    The configuration page of the AutoScaler rendered here
     - Included the reset button that delete image data in database and AWS S3
     :return:
     """
     if request.method == 'POST':
         op_mode_str = request.form.get('op_mode')
         if op_mode_str == 'Manual':
-            scalar_config['op_mode'] = op_mode_str
+            scaler_config['op_mode'] = op_mode_str
             # Send the mode change to AutoScaler
-            req_addr = managerapp.config['AUTOSCALAR_URL']
+            req_addr = managerapp.config['AUTOSCALER_URL']
             response = {
                 'mode': 'Manual',
                 'add_drop': '0'
             }
             send_post_request_with_body(req_addr, response)
             if DEBUG is True:
-                print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
+                print('Switching to Manual Mode, Pool Size: ', scaler_config['worker'])
             flash("Switched to Manual Mode!")
         elif op_mode_str == 'Automatic':
             miss_max_str = request.form.get('miss_max')
@@ -157,12 +157,12 @@ def autoscalar_config():
                     print('Mode: ', op_mode_str)
                     print('Miss Rate Max: ', miss_max, 'Miss Rate Min: ', miss_min)
                     print('Expan Ratio: ', exp_ratio, 'Shrink Ratio ', shr_ratio)
-                scalar_config['op_mode'] = op_mode_str
-                scalar_config['miss_max'] = miss_max
-                scalar_config['miss_min'] = miss_min
-                scalar_config['exp_ratio'] = exp_ratio
-                scalar_config['shr_ratio'] = shr_ratio
-                req_addr = managerapp.config['AUTOSCALAR_URL']
+                scaler_config['op_mode'] = op_mode_str
+                scaler_config['miss_max'] = miss_max
+                scaler_config['miss_min'] = miss_min
+                scaler_config['exp_ratio'] = exp_ratio
+                scaler_config['shr_ratio'] = shr_ratio
+                req_addr = managerapp.config['AUTOSCALER_URL']
                 response = {
                     'mode': 'Automatic',
                     'max_miss': miss_max_str,
@@ -171,10 +171,10 @@ def autoscalar_config():
                     'shrink_ratio': shr_ratio_str
                 }
                 send_post_request_with_body(req_addr, response)
-                flash("Switched to Auto Mode! Applying settings to the AutoScalar")
+                flash("Switched to Auto Mode! Applying settings to the AutoScaler")
         elif DEBUG is True:
-            print('Error: Unknown AutoScalar Operation Mode')
-    return render_template('autoscalar_config.html', config=scalar_config)
+            print('Error: Unknown AutoScaler Operation Mode')
+    return render_template('autoscaler_config.html', config=scaler_config)
 
 
 @managerapp.route('/reset')
@@ -188,7 +188,7 @@ def reset_system():
     if DEBUG is True:
         print('Reset Requests are sent to FrontEndApp')
     flash("All Application Data are Deleted!")
-    return render_template('autoscalar_config.html', config=scalar_config)
+    return render_template('autoscaler_config.html', config=scaler_config)
 
 
 @managerapp.route('/start_worker', methods=['GET', 'POST'])
@@ -197,8 +197,8 @@ def start_worker():
     Start a worker in manual mode
     :return:
     """
-    if scalar_config['op_mode'] != 'Manual':
-        scalar_config['op_mode'] = 'Manual'
+    if scaler_config['op_mode'] != 'Manual':
+        scaler_config['op_mode'] = 'Manual'
     # get the current worker lists
     stopped_worker = stats_aws_get_worker_list('stopped')
     pending_worker = stats_aws_get_worker_list('pending')
@@ -210,10 +210,10 @@ def start_worker():
     elif not stopped_worker:
         flash("No free worker is available at the moment.")
     else:
-        if scalar_config['worker'] < 8:
-            scalar_config['worker'] += 1
-            # Send the new configuration to AutoScalar
-            req_addr = managerapp.config['AUTOSCALAR_URL']
+        if scaler_config['worker'] < 8:
+            scaler_config['worker'] += 1
+            # Send the new configuration to AutoScaler
+            req_addr = managerapp.config['AUTOSCALER_URL']
             response = {
                 'mode': 'Manual',
                 'add_drop': '1'
@@ -226,8 +226,8 @@ def start_worker():
             flash("Maximum Worker is Running!")
 
         if DEBUG is True:
-            print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
-    return render_template('autoscalar_config.html', config=scalar_config)
+            print('Switching to Manual Mode, Pool Size: ', scaler_config['worker'])
+    return render_template('autoscaler_config.html', config=scaler_config)
 
 
 @managerapp.route('/pause_worker', methods=['GET', 'POST'])
@@ -247,12 +247,12 @@ def pause_worker():
     elif not running_worker:
         flash("All worker is stopped at the moment.")
     else:
-        if scalar_config['op_mode'] != 'Manual':
-            scalar_config['op_mode'] = 'Manual'
-        if scalar_config['worker'] > 1:
-            scalar_config['worker'] -= 1
-            # Send the new configuration to AutoScalar
-            req_addr = managerapp.config['AUTOSCALAR_URL']
+        if scaler_config['op_mode'] != 'Manual':
+            scaler_config['op_mode'] = 'Manual'
+        if scaler_config['worker'] > 1:
+            scaler_config['worker'] -= 1
+            # Send the new configuration to AutoScaler
+            req_addr = managerapp.config['AUTOSCALER_URL']
             response = {
                 'mode': 'Manual',
                 'add_drop': '-1'
@@ -264,7 +264,7 @@ def pause_worker():
         else:
             flash("At least one worker is required to running.")
         if DEBUG is True:
-            print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
+            print('Switching to Manual Mode, Pool Size: ', scaler_config['worker'])
 
-    return render_template('autoscalar_config.html', config=scalar_config)
+    return render_template('autoscaler_config.html', config=scaler_config)
 

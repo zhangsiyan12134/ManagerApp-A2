@@ -1,4 +1,4 @@
-from app import managerapp, ec2_client, DEBUG, stats, scalar_config
+from app import managerapp, ec2_client, DEBUG, stats, scaler_config
 from botocore.exceptions import ClientError
 
 
