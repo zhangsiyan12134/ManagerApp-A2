@@ -135,7 +135,7 @@ def autoscalar_config():
             req_addr = managerapp.config['AUTOSCALAR_URL']
             response = {
                 'mode': 'Manual',
-                'add': '0'
+                'add_drop': '0'
             }
             send_post_request_with_body(req_addr, response)
             if DEBUG is True:
@@ -216,7 +216,7 @@ def start_worker():
             req_addr = managerapp.config['AUTOSCALAR_URL']
             response = {
                 'mode': 'Manual',
-                'add': '1'
+                'add_drop': '1'
             }
             send_post_request_with_body(req_addr, response)
             # NOTE: Manual start a EC2 instance is handled by AutoScaler now
@@ -255,7 +255,7 @@ def pause_worker():
             req_addr = managerapp.config['AUTOSCALAR_URL']
             response = {
                 'mode': 'Manual',
-                'add': '-1'
+                'add_drop': '-1'
             }
             send_post_request_with_body(req_addr, response)
             # NOTE: Manual start a EC2 instance is handled by AutoScaler now
