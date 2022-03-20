@@ -3,8 +3,8 @@ import os
 
 class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-    AUTOSCALAR_URL = "http://localhost:5003"
-    FRONTEND_URL = "http://localhost:5000"
+    AUTOSCALAR_URL = "http://localhost:5003/"
+    FRONTEND_URL = "http://localhost:5000/"
     SCHEDULER_API_ENABLED = True
     SCHEDULER_TIMEZONE = "America/Toronto"
     JOB_INTERVAL = 60  # interval for jobs(in seconds)

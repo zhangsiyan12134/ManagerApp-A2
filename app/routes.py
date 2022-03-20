@@ -109,7 +109,7 @@ def autoscalar_config():
         if op_mode_str == 'Manual':
             scalar_config['op_mode'] = op_mode_str
             # Send the mode change to AutoScaler
-            req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/'
+            req_addr = managerapp.config['AUTOSCALAR_URL']
             response = {
                 'mode': 'Manual',
                 'add': 0
@@ -139,7 +139,7 @@ def autoscalar_config():
                 scalar_config['miss_min'] = miss_min
                 scalar_config['exp_ratio'] = exp_ratio
                 scalar_config['shr_ratio'] = shr_ratio
-                req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/'
+                req_addr = managerapp.config['AUTOSCALAR_URL']
                 response = {
                     'mode': 'Automatic',
                     'max_miss': miss_max,
@@ -160,7 +160,7 @@ def reset_system():
     The reset commend that delete image data in database and AWS S3
     :return:
     """
-    req_addr = 'http://' + managerapp.config['FRONTEND_URL'] + '/api/manager/clear'
+    req_addr = managerapp.config['FRONTEND_URL'] + 'api/manager/clear'
     requests.post(req_addr)
     if DEBUG is True:
         print('Reset Requests are sent to FrontEndApp')
@@ -190,7 +190,7 @@ def start_worker():
         if scalar_config['worker'] < 8:
             scalar_config['worker'] += 1
             # Send the new configuration to AutoScalar
-            req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/'
+            req_addr = managerapp.config['AUTOSCALAR_URL']
             response = {
                 'mode': 'Manual',
                 'add': 1
@@ -229,7 +229,7 @@ def pause_worker():
         if scalar_config['worker'] > 1:
             scalar_config['worker'] -= 1
             # Send the new configuration to AutoScalar
-            req_addr = 'http://' + managerapp.config['AUTOSCALAR_URL'] + '/'
+            req_addr = managerapp.config['AUTOSCALAR_URL']
             response = {
                 'mode': 'Manual',
                 'add': -1
