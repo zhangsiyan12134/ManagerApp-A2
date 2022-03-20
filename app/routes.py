@@ -11,8 +11,9 @@ def send_post_request(addr, data):
     try:
         r = requests.post(addr, data=data)
     except requests.exceptions.RequestException as e:
-        print(e)
-
+        print("Warning: Exception happened when sending the request")
+        if DEBUG is True:
+            print(e)
 
 def dummy_data():
     """
