@@ -5,6 +5,7 @@ from app.db_access import update_rds_memcache_config
 from app.ec2_access import ec2_start_instance, ec2_pause_instance
 from random import seed, uniform, randint
 import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 
 def send_post_request(addr, data):
@@ -14,6 +15,20 @@ def send_post_request(addr, data):
         print("Warning: Exception happened when sending the request")
         if DEBUG is True:
             print(e)
+
+
+def send_post_request_with_body(addr, params):
+    data = MultipartEncoder(fields=params)
+    headers = {
+        'Content-type': data.content_type
+    }
+    try:
+        r = requests.post(addr, data=data, headers=headers)
+    except requests.exceptions.RequestException as e:
+        print("Warning: Exception happened when sending the request")
+        if DEBUG is True:
+            print(e)
+
 
 def dummy_data():
     """
@@ -122,7 +137,7 @@ def autoscalar_config():
                 'mode': 'Manual',
                 'add': 0
             }
-            send_post_request(req_addr, response)
+            send_post_request_with_body(req_addr, response)
             if DEBUG is True:
                 print('Switching to Manual Mode, Pool Size: ', scalar_config['worker'])
             flash("Switched to Manual Mode!")
@@ -155,7 +170,7 @@ def autoscalar_config():
                     'expand_ratio': exp_ratio,
                     'shrink_ratio': shr_ratio
                 }
-                send_post_request(req_addr, response)
+                send_post_request_with_body(req_addr, response)
                 flash("Switched to Auto Mode! Applying settings to the AutoScalar")
         elif DEBUG is True:
             print('Error: Unknown AutoScalar Operation Mode')
@@ -203,7 +218,7 @@ def start_worker():
                 'mode': 'Manual',
                 'add': 1
             }
-            send_post_request(req_addr, response)
+            send_post_request_with_body(req_addr, response)
             # NOTE: Manual start a EC2 instance is handled by AutoScaler now
             # ec2_start_instance(stopped_worker[0])
             flash("Switched to Manual Mode. Please waiting for worker to boot up.")
@@ -242,7 +257,7 @@ def pause_worker():
                 'mode': 'Manual',
                 'add': -1
             }
-            send_post_request(req_addr, response)
+            send_post_request_with_body(req_addr, response)
             # NOTE: Manual start a EC2 instance is handled by AutoScaler now
             # ec2_pause_instance(running_worker[-1])
             flash("Switched to Manual Mode. Please waiting for worker to stop.")
