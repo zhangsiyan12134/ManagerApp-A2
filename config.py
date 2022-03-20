@@ -10,14 +10,14 @@ class Config(object):
     JOB_INTERVAL = 60  # interval for jobs(in seconds)
     ASW_CONFIG = {
         'REGION': 'us-east-1',
-        'AWS_ACCESS_KEY_ID': 'AKIA2NPVZMNRXQ7U2P45',
-        'SECRET_ACCESS_KEY': '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'
+        'AWS_ACCESS_KEY_ID': '',
+        'SECRET_ACCESS_KEY': ''
     }
     RDS_CONFIG = {
         'host': 'ece1779.cxbccost2b0y.us-east-1.rds.amazonaws.com',
         'port': 3306,
-        'user': 'E1779usr',
-        'password': '1779Usr!',
+        'user': '',
+        'password': '',
         'database': 'ECE1779'
     }
     INSTANCE_LIST = {
