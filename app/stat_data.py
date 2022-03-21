@@ -1,4 +1,4 @@
-from app import managerapp, scheduler, stats, worker_list, DEBUG, ec2_resource, cloudwatch_client
+from app import managerapp, scheduler, stats, worker_list, scaler_config, DEBUG, ec2_resource, cloudwatch_client
 from app.db_access import update_rds_worker_count
 from datetime import datetime, timedelta
 
@@ -142,7 +142,13 @@ def stats_get_worker_list():
     # The following section update the running worker counter
     if (DEBUG is True) and (worker_cnt == 0):
         print('Error No Available Worker')
+
     stats_append('Workers', worker_cnt)
+
+    # update the configured worker count if stat is changed
+    if stats['Workers'][-1] != stats['Workers'][-2]:
+        scaler_config['worker'] = stats['Workers'][-1]
+
     if DEBUG is True:
         print('Worker data collection completed')
     # NOTE: Worker count on RDS update by AutoScaler now
