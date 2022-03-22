@@ -58,7 +58,6 @@ def dummy_data():
     stats['Reqs'].pop(0)
 
 
-# refreshConfiguration function required by frontend
 @managerapp.before_first_request
 def get_stats_tasks():
     # add the task to scheduler for workers and memcache statistic data updates

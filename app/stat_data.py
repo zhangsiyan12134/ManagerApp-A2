@@ -142,7 +142,7 @@ def stats_get_worker_list():
     # The following section update the running worker counter
     if (DEBUG is True) and (worker_cnt == 0):
         print('Error No Available Worker')
-
+    # add new data into stats array
     stats_append('Workers', worker_cnt)
 
     # update the configured worker count if stat is changed
