@@ -9,6 +9,13 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 
 def send_post_request(addr, data):
+    """
+    Helper function to send POSt request that doesn't require a
+    full hreaders
+    :param addr: srt: request receiver url
+    :param data: dict
+    :return:
+    """
     try:
         r = requests.post(addr, data=data)
     except requests.exceptions.RequestException as e:
@@ -18,6 +25,13 @@ def send_post_request(addr, data):
 
 
 def send_post_request_with_body(addr, params):
+    """
+    Helper function to send POSt request that require a full
+    hreaders
+    :param addr: srt: request receiver url
+    :param params: dict
+    :return:
+    """
     data = MultipartEncoder(fields=params)
     headers = {
         'Content-type': data.content_type
@@ -28,6 +42,22 @@ def send_post_request_with_body(addr, params):
         print("Warning: Exception happened when sending the request")
         if DEBUG is True:
             print(e)
+
+
+def worker_auto_start():
+    """
+    This function will be trigger on the first request to start
+    a EC2 instance.
+    :return:
+    """
+    req_addr = managerapp.config['AUTOSCALER_URL']
+    response = {
+            'mode': 'Manual',
+            'add_drop': '1'
+        }
+    send_post_request_with_body(req_addr, response)
+    if DEBUG is True:
+        print("Request sent, worker is booting, please wait.")
 
 
 def dummy_data():
@@ -60,6 +90,8 @@ def dummy_data():
 
 @managerapp.before_first_request
 def get_stats_tasks():
+    # start the very first worker here
+    worker_auto_start()
     # add the task to scheduler for workers and memcache statistic data updates
     """scheduler.add_job(id='insert_dummy_data', func=dummy_data, trigger='interval',
                       seconds=5)"""
